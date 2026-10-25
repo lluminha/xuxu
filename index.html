@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uma pergunta pra você 💌</title>
+<style>
+  /* ====== CONFIGURAÇÃO FÁCIL ======
+     Edite o texto direto no bloco <script> lá embaixo (CONFIG).
+     As cores principais ficam aqui: */
+  :root {
+    --bg1: #ffd1e3;
+    --bg2: #ffeef6;
+    --rosa: #ff4d8d;
+    --rosa-escuro: #d6336c;
+    --texto: #5a1a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    background: radial-gradient(circle at 30% 20%, var(--bg2), var(--bg1));
+    color: var(--texto);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+    padding: 20px;
+  }
+  .card { position: relative; z-index: 2; max-width: 520px; width: 100%; }
+  .figura { margin-bottom: 18px; min-height: 140px; display: flex; align-items: center; justify-content: center; }
+  .figura img { max-width: 260px; max-height: 340px; border-radius: 18px; box-shadow: 0 10px 24px rgba(214,51,108,.35); }
+  .coracao-fig { font-size: 110px; animation: bate 1.2s infinite; filter: drop-shadow(0 8px 12px rgba(214,51,108,.35)); }
+  @keyframes bate { 0%,100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(1); } 45% { transform: scale(1.12); } }
+  h2 { font-size: clamp(1.6rem, 6vw, 2.3rem); margin-bottom: 26px; line-height: 1.25; }
+  .botoes { display: flex; gap: 18px; justify-content: center; align-items: center; min-height: 80px; flex-wrap: wrap; }
+  button {
+    font-size: 1.15rem; font-weight: 700; border: none; border-radius: 999px;
+    padding: 12px 34px; cursor: pointer; color: #fff;
+    transition: transform .15s ease, box-shadow .15s ease;
+    box-shadow: 0 6px 14px rgba(0,0,0,.15);
+  }
+  button:active { transform: scale(.95); }
+  #sim { background: var(--rosa); }
+  #sim:hover { background: var(--rosa-escuro); }
+  #nao { background: #8a8a99; }
+  #resposta { display: none; }
+  #resposta h2 { margin-bottom: 0; }
+  .final .pergunta, .final .botoes { display: none; }
+  .final #resposta { display: block; animation: surge .6s ease; }
+  @keyframes surge { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+  .flutuante { position: fixed; bottom: -40px; font-size: 24px; opacity: .8; animation: sobe linear forwards; z-index: 1; pointer-events: none; }
+  @keyframes sobe { to { transform: translateY(-115vh) rotate(25deg); opacity: 0; } }
+</style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="figura" id="figura"></div>
+
+    <div class="pergunta">
+      <h2 id="pergunta"></h2>
+    </div>
+
+    <div class="botoes" id="botoes">
+      <button id="sim"></button>
+      <button id="nao"></button>
+    </div>
+
+    <div id="resposta"><h2 id="textoResposta"></h2></div>
+  </div>
+
+<script>
+  // ============ EDITE AQUI ============
+  const CONFIG = {
+    pergunta:  "Quem é meu xuxu?",             // <- troque a frase
+    resposta:  "Meio que já sabia 😏",          // <- troque a resposta (depois do SIM)
+    botaoSim:  "Sou eu, sou eu",
+    botaoNao:  "Não sou eu",
+    // Para usar uma foto/gif seu: coloque o link ou o nome do arquivo (ex: "foto.jpg").
+    // Deixe vazio ("") para usar o coração animado.
+    imagem:    "foto.jpg",
+    emojiFig:  "💖",                            // emoji usado quando não há imagem
+    emojisChuva: ["💖","💕","😍","🌸","✨"]
+  };
+  // ====================================
+
+  const $ = id => document.getElementById(id);
+  $("pergunta").textContent = CONFIG.pergunta;
+  $("textoResposta").textContent = CONFIG.resposta;
+  $("sim").textContent = CONFIG.botaoSim;
+  $("nao").textContent = CONFIG.botaoNao;
+
+  const fig = $("figura");
+  if (CONFIG.imagem) {
+    const img = document.createElement("img");
+    img.src = CONFIG.imagem; img.alt = "";
+    // se a foto não for encontrada, volta para o coração animado
+    img.onerror = () => {
+      img.remove();
+      const d = document.createElement("div");
+      d.className = "coracao-fig"; d.textContent = CONFIG.emojiFig;
+      fig.appendChild(d);
+    };
+    fig.appendChild(img);
+  } else {
+    const d = document.createElement("div");
+    d.className = "coracao-fig"; d.textContent = CONFIG.emojiFig;
+    fig.appendChild(d);
+  }
+
+  // Botão "Não" foge do mouse / dedo
+  const nao = $("nao"), sim = $("sim");
+  let escala = 1;
+  function fugir() {
+    nao.style.position = "fixed";
+    const m = 20;
+    const x = Math.random() * (window.innerWidth  - nao.offsetWidth  - m * 2) + m;
+    const y = Math.random() * (window.innerHeight - nao.offsetHeight - m * 2) + m;
+    nao.style.left = x + "px";
+    nao.style.top  = y + "px";
+    escala = Math.min(escala + 0.12, 2.2);   // o "Sim" cresce a cada tentativa
+    sim.style.transform = "scale(" + escala + ")";
+  }
+  nao.addEventListener("mouseover", fugir);
+  nao.addEventListener("touchstart", e => { e.preventDefault(); fugir(); }, { passive: false });
+  nao.addEventListener("click", fugir);
+
+  // Chuva de emojis
+  function chuva() {
+    for (let i = 0; i < 40; i++) {
+      setTimeout(() => {
+        const s = document.createElement("span");
+        s.className = "flutuante";
+        s.textContent = CONFIG.emojisChuva[Math.floor(Math.random() * CONFIG.emojisChuva.length)];
+        s.style.left = Math.random() * 100 + "vw";
+        s.style.fontSize = (18 + Math.random() * 28) + "px";
+        s.style.animationDuration = (3 + Math.random() * 3) + "s";
+        document.body.appendChild(s);
+        setTimeout(() => s.remove(), 6500);
+      }, i * 120);
+    }
+  }
+
+  sim.addEventListener("click", () => {
+    $("card").classList.add("final");
+    nao.style.display = "none";
+    chuva();
+    setInterval(chuva, 5000);
+  });
+</script>
+</body>
+</html>
